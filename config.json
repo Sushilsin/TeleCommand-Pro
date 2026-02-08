@@ -1,0 +1,39 @@
+{
+  "telegram_token": "8483344515:AAFWfE78jRPzWa60iTrb_WUuAV-8l0DYHiA",
+  "authorized_users": [
+    123456789,
+    196807778
+  ],
+  "whitelist_enabled": false,
+  "allowed_commands": [
+    "ls",
+    "pwd",
+    "date",
+    "uptime",
+    "whoami",
+    "hostname",
+    "df",
+    "free",
+    "top",
+    "ps",
+    "cat",
+    "tail",
+    "head",
+    "grep",
+    "find",
+    "du",
+    "which",
+    "systemctl",
+    "service",
+    "netstat",
+    "ss",
+    "ip",
+    "ping",
+    "curl",
+    "wget",
+    "git",
+    "docker",
+    "kubectl"
+  ],
+  "command_timeout": 30
+}

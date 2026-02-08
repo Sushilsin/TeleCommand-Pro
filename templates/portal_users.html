@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Portal Users - TeleCommand Pro{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 2rem;">👨‍💼 Portal User Management</h1>
+
+<div class="card">
+    <h2 class="card-title">Add New User</h2>
+    
+    <form method="POST" action="{{ url_for('add_portal_user') }}">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+            <div class="form-group">
+                <label class="form-label" for="username">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required minlength="6">
+                <small style="color: #666; font-size: 0.875rem;">Minimum 6 characters</small>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="email">Email (optional)</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="user@example.com">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="role">Role</label>
+                <select class="form-control" id="role" name="role" required>
+                    <option value="viewer">Viewer (read-only)</option>
+                    <option value="admin">Admin (full access)</option>
+                </select>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">➕ Add User</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2 class="card-title">Portal Users ({{ users|length }})</h2>
+    
+    {% if users %}
+    <div style="overflow-x: auto;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>
+                        <strong>{{ user.username }}</strong>
+                        {% if user.id == session.user_id %}
+                            <span class="badge badge-info" style="margin-left: 0.5rem;">You</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ user.email or '—' }}</td>
+                    <td>
+                        {% if user.role == 'admin' %}
+                            <span class="badge" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #78350f;">
+                                👑 Admin
+                            </span>
+                        {% else %}
+                            <span class="badge badge-info">
+                                👁️ Viewer
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.is_active %}
+                            <span class="badge badge-success">✅ Active</span>
+                        {% else %}
+                            <span class="badge badge-danger">❌ Disabled</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ user.created_at }}</td>
+                    <td>
+                        <div style="display: flex; gap: 0.5rem;">
+                            {% if user.id != session.user_id %}
+                                <form method="POST" action="{{ url_for('toggle_portal_user', user_id=user.id) }}" style="display: inline;">
+                                    <button type="submit" class="btn btn-sm" 
+                                            style="background: {% if user.is_active %}#f59e0b{% else %}#10b981{% endif %}; color: white;"
+                                            onclick="return confirm('{% if user.is_active %}Disable{% else %}Enable{% endif %} user {{ user.username }}?')">
+                                        {% if user.is_active %}⏸️ Disable{% else %}▶️ Enable{% endif %}
+                                    </button>
+                                </form>
+                                
+                                <form method="POST" action="{{ url_for('delete_portal_user', user_id=user.id) }}" style="display: inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger"
+                                            onclick="return confirm('Delete user {{ user.username }}? This cannot be undone!')">
+                                        🗑️ Delete
+                                    </button>
+                                </form>
+                            {% else %}
+                                <a href="{{ url_for('profile') }}" class="btn btn-sm btn-primary">
+                                    👤 My Profile
+                                </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="text-align: center; color: #999; padding: 2rem;">No users found</p>
+    {% endif %}
+</div>
+
+<div class="card" style="background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);">
+    <h2 class="card-title" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+        ⚠️ Important Notes
+    </h2>
+    <ul style="margin-left: 1.5rem; line-height: 1.8;">
+        <li><strong>Admin:</strong> Full access - can manage all settings, users, and bot control</li>
+        <li><strong>Viewer:</strong> Read-only access - can view dashboard, logs, and users but cannot make changes</li>
+        <li><strong>Security:</strong> Use strong passwords and unique usernames</li>
+        <li><strong>Default Account:</strong> Change the default admin password immediately</li>
+        <li><strong>Self-Protection:</strong> You cannot disable or delete your own account</li>
+    </ul>
+</div>
+{% endblock %}

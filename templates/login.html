@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Login - TeleCommand Pro{% endblock %}
+
+{% block content %}
+<style>
+    .login-container {
+        max-width: 450px;
+        margin: 4rem auto;
+        padding: 0 1rem;
+    }
+    
+    .login-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 3rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        animation: floatIn 0.6s ease;
+    }
+    
+    @keyframes floatIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    .login-title {
+        text-align: center;
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 800;
+    }
+    
+    .login-icon {
+        text-align: center;
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+        animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .login-card .form-control {
+        background: rgba(255, 255, 255, 0.8);
+    }
+    
+    @media (max-width: 768px) {
+        .login-container {
+            margin: 2rem auto;
+        }
+        
+        .login-card {
+            padding: 2rem 1.5rem;
+        }
+        
+        .login-icon {
+            font-size: 4rem;
+        }
+    }
+</style>
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-icon">🤖</div>
+        <h1 class="login-title">TeleCommand Pro Portal</h1>
+        
+        <form method="POST">
+            <div class="form-group">
+                <label class="form-label" for="username">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required autocomplete="username" autofocus>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required autocomplete="current-password">
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                🔐 Login
+            </button>
+        </form>
+        
+        <div style="margin-top: 2rem; padding: 1rem; text-align: center; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 12px; border-left: 4px solid var(--info);">
+            <p style="color: #1e40af; font-size: 0.875rem; margin: 0;">
+                ℹ️ Contact your administrator for login credentials
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

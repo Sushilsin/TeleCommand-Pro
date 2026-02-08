@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Log #{{ log.id }} - TeleCommand Pro{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 1rem;">
+    <a href="{{ url_for('logs') }}" class="btn btn-sm btn-primary">← Back to Logs</a>
+</div>
+
+<div class="card">
+    <h2 class="card-title">Command Log #{{ log.id }}</h2>
+    
+    <table class="table">
+        <tr>
+            <th style="width: 200px;">Executed At</th>
+            <td>{{ log.executed_at }}</td>
+        </tr>
+        <tr>
+            <th>User ID</th>
+            <td>{{ log.telegram_user_id }}</td>
+        </tr>
+        <tr>
+            <th>Username</th>
+            <td>
+                {% if log.username %}
+                    @{{ log.username }}
+                {% else %}
+                    <span style="color: #999;">—</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th>Full Name</th>
+            <td>
+                {% if log.first_name or log.last_name %}
+                    {{ log.first_name or '' }} {{ log.last_name or '' }}
+                {% else %}
+                    <span style="color: #999;">—</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th>Status</th>
+            <td>
+                {% if log.success %}
+                    <span class="badge badge-success">✅ Success</span>
+                {% else %}
+                    <span class="badge badge-danger">❌ Failed</span>
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+    
+    <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #667eea;">Command</h3>
+    <div class="code-block">{{ log.command }}</div>
+    
+    <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #667eea;">Output</h3>
+    {% if log.output %}
+    <div class="code-block">{{ log.output }}</div>
+    {% else %}
+    <p style="color: #999; font-style: italic;">No output</p>
+    {% endif %}
+</div>
+{% endblock %}

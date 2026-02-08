@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - TeleCommand Pro{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 2rem;">📊 Dashboard</h1>
+
+{% if session.role == 'admin' %}
+<div class="card" style="margin-bottom: 2rem;">
+    <h2 class="card-title">🤖 Bot Control</h2>
+    
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 2rem;">
+        <div style="flex: 1;">
+            <div id="bot-status" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                <div style="width: 12px; height: 12px; border-radius: 50%; {% if bot_status.running %}background: #28a745;{% else %}background: #dc3545;{% endif %}" id="status-indicator"></div>
+                <span style="font-size: 1.25rem; font-weight: 600;" id="status-text">
+                    {% if bot_status.running %}
+                        ✅ Bot is Running
+                    {% else %}
+                        ❌ Bot is Stopped
+                    {% endif %}
+                </span>
+            </div>
+            {% if bot_status.pid %}
+            <p style="color: #666; font-size: 0.875rem;">Process ID: <code>{{ bot_status.pid }}</code></p>
+            {% else %}
+            <p style="color: #666; font-size: 0.875rem;">No active process</p>
+            {% endif %}
+            <p id="bot-message" style="color: #666; font-size: 0.875rem; margin-top: 0.5rem;"></p>
+        </div>
+        
+        <div style="display: flex; gap: 1rem;">
+            <button onclick="startBot()" class="btn btn-success" id="start-btn" {% if bot_status.running %}disabled{% endif %}>
+                ▶️ Start
+            </button>
+            <button onclick="stopBot()" class="btn" style="background: #dc3545; color: white;" id="stop-btn" {% if not bot_status.running %}disabled{% endif %}>
+                ⏹️ Stop
+            </button>
+            <button onclick="restartBot()" class="btn" style="background: #ffc107; color: #000;" id="restart-btn" {% if not bot_status.running %}disabled{% endif %}>
+                🔄 Restart
+            </button>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="card" style="margin-bottom: 2rem;">
+    <h2 class="card-title">🤖 Bot Status</h2>
+    
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="width: 12px; height: 12px; border-radius: 50%; {% if bot_status.running %}background: #28a745;{% else %}background: #dc3545;{% endif %}"></div>
+        <span style="font-size: 1.25rem; font-weight: 600;">
+            {% if bot_status.running %}
+                ✅ Bot is Running
+            {% else %}
+                ❌ Bot is Stopped
+            {% endif %}
+        </span>
+    </div>
+    
+    <p style="color: #6b7280; font-size: 0.875rem; margin-top: 1rem;">
+        ℹ️ Contact an administrator to control the bot
+    </p>
+</div>
+{% endif %}
+
+<script>
+function updateBotStatus(running, pid, message) {
+    const indicator = document.getElementById('status-indicator');
+    const statusText = document.getElementById('status-text');
+    const startBtn = document.getElementById('start-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const restartBtn = document.getElementById('restart-btn');
+    const messageEl = document.getElementById('bot-message');
+    
+    if (running) {
+        indicator.style.background = '#28a745';
+        statusText.textContent = '✅ Bot is Running';
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+        restartBtn.disabled = false;
+    } else {
+        indicator.style.background = '#dc3545';
+        statusText.textContent = '❌ Bot is Stopped';
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        restartBtn.disabled = true;
+    }
+    
+    if (message) {
+        messageEl.textContent = message;
+        setTimeout(() => { messageEl.textContent = ''; }, 5000);
+    }
+}
+
+function startBot() {
+    if (!confirm('Start the TeleCommand Pro bot?')) return;
+    
+    document.getElementById('bot-message').textContent = '⏳ Starting bot...';
+    
+    fetch('/api/bot/start', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            updateBotStatus(data.success, null, data.message);
+            if (data.success) setTimeout(() => location.reload(), 2000);
+        })
+        .catch(err => {
+            document.getElementById('bot-message').textContent = '❌ Error: ' + err;
+        });
+}
+
+function stopBot() {
+    if (!confirm('Stop the TeleCommand Pro bot?')) return;
+    
+    document.getElementById('bot-message').textContent = '⏳ Stopping bot...';
+    
+    fetch('/api/bot/stop', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            updateBotStatus(data.success ? false : true, null, data.message);
+            if (data.success) setTimeout(() => location.reload(), 2000);
+        })
+        .catch(err => {
+            document.getElementById('bot-message').textContent = '❌ Error: ' + err;
+        });
+}
+
+function restartBot() {
+    if (!confirm('Restart the TeleCommand Pro bot?')) return;
+    
+    document.getElementById('bot-message').textContent = '⏳ Restarting bot...';
+    
+    fetch('/api/bot/restart', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            updateBotStatus(data.success, null, data.message);
+            setTimeout(() => location.reload(), 3000);
+        })
+        .catch(err => {
+            document.getElementById('bot-message').textContent = '❌ Error: ' + err;
+        });
+}
+
+// Auto-refresh status every 10 seconds
+setInterval(() => {
+    fetch('/api/bot/status')
+        .then(r => r.json())
+        .then(data => {
+            updateBotStatus(data.running, data.pid, null);
+        });
+}, 10000);
+</script>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.total_users }}</div>
+        <div class="stat-label">Active Users</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.total_commands }}</div>
+        <div class="stat-label">Total Commands</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.successful_commands }}</div>
+        <div class="stat-label">Successful</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.failed_commands }}</div>
+        <div class="stat-label">Failed</div>
+    </div>
+</div>
+
+<div class="card">
+    <h2 class="card-title">Recent Commands</h2>
+    
+    {% if recent_commands %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>User</th>
+                <th>Command</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cmd in recent_commands %}
+            <tr>
+                <td>{{ cmd.executed_at }}</td>
+                <td>
+                    {% if cmd.username %}
+                        @{{ cmd.username }}
+                    {% elif cmd.first_name %}
+                        {{ cmd.first_name }}
+                    {% else %}
+                        ID: {{ cmd.telegram_user_id }}
+                    {% endif %}
+                </td>
+                <td><code>{{ cmd.command[:50] }}{% if cmd.command|length > 50 %}...{% endif %}</code></td>
+                <td>
+                    {% if cmd.success %}
+                        <span class="badge badge-success">✅ Success</span>
+                    {% else %}
+                        <span class="badge badge-danger">❌ Failed</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('log_detail', log_id=cmd.id) }}" class="btn btn-sm btn-primary">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="text-align: center; color: #999; padding: 2rem;">No commands logged yet</p>
+    {% endif %}
+    
+    <div style="text-align: center; margin-top: 1rem;">
+        <a href="{{ url_for('logs') }}" class="btn btn-primary">View All Logs</a>
+    </div>
+</div>
+
+<div class="card">
+    <h2 class="card-title">Active Users</h2>
+    
+    {% if active_users %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Username</th>
+                <th>Name</th>
+                <th>Last Seen</th>
+                <th>Added</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in active_users %}
+            <tr>
+                <td><strong>{{ user.user_id }}</strong></td>
+                <td>
+                    {% if user.username %}
+                        @{{ user.username }}
+                    {% else %}
+                        <span style="color: #999;">—</span>
+                    {% endif %}
+                </td>
+                <td>{{ user.first_name or '—' }} {{ user.last_name or '' }}</td>
+                <td>{{ user.last_seen or 'Never' }}</td>
+                <td>{{ user.added_at }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="text-align: center; color: #999; padding: 2rem;">No users added yet</p>
+    {% endif %}
+    
+    <div style="text-align: center; margin-top: 1rem;">
+        <a href="{{ url_for('users') }}" class="btn btn-primary">Manage Users</a>
+    </div>
+</div>
+{% endblock %}

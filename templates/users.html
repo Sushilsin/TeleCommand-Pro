@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}User Management - TeleCommand Pro{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 2rem;">👥 Telegram User Management</h1>
+
+{% if session.role == 'admin' %}
+<div class="card">
+    <h2 class="card-title">Add New User</h2>
+    
+    <form method="POST" action="{{ url_for('add_user') }}">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 1rem; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" for="user_id">Telegram User ID *</label>
+                <input type="number" class="form-control" id="user_id" name="user_id" required placeholder="123456789">
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" for="username">Username (optional)</label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="@username">
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" for="first_name">First Name (optional)</label>
+                <input type="text" class="form-control" id="first_name" name="first_name" placeholder="John">
+            </div>
+            
+            <button type="submit" class="btn btn-primary">➕ Add User</button>
+        </div>
+    </form>
+    
+    <div style="margin-top: 1rem; padding: 1rem; background: #e3f2fd; border-radius: 8px;">
+        <strong>💡 How to get User ID:</strong>
+        <ol style="margin: 0.5rem 0 0 1.5rem;">
+            <li>Search for <strong>@userinfobot</strong> on Telegram</li>
+            <li>Start a chat and it will show your User ID</li>
+            <li>Copy and paste the ID here</li>
+        </ol>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <h2 class="card-title">Authorized Users ({{ users|length }})</h2>
+    
+    {% if users %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Username</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Last Seen</th>
+                <th>Added</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td><strong>{{ user.user_id }}</strong></td>
+                <td>
+                    {% if user.username %}
+                        @{{ user.username }}
+                    {% else %}
+                        <span style="color: #999;">—</span>
+                    {% endif %}
+                </td>
+                <td>{{ user.first_name or '—' }} {{ user.last_name or '' }}</td>
+                <td>
+                    {% if user.is_active %}
+                        <span class="badge badge-success">✅ Active</span>
+                    {% else %}
+                        <span class="badge badge-danger">❌ Inactive</span>
+                    {% endif %}
+                </td>
+                <td>{{ user.last_seen or 'Never' }}</td>
+                <td>{{ user.added_at }}</td>
+                <td>
+                    {% if user.is_active %}
+                        {% if session.role == 'admin' %}
+                        <form method="POST" action="{{ url_for('remove_user', user_id=user.user_id) }}" style="display: inline;">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to remove this user?')">
+                                🗑️ Remove
+                            </button>
+                        </form>
+                        {% else %}
+                            <span class="badge badge-success">✅ Active</span>
+                        {% endif %}
+                    {% else %}
+                        <span style="color: #999;">Removed</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="text-align: center; color: #999; padding: 2rem;">
+        No users added yet. Add your first user above!
+    </p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2 class="card-title">Current config.json authorized_users</h2>
+    <div class="code-block">{{ authorized_ids }}</div>
+    <p style="margin-top: 1rem; color: #666; font-size: 0.875rem;">
+        <strong>⚠️ Note:</strong> Changes here are synced to config.json automatically. Restart the bot to apply changes.
+    </p>
+</div>
+{% endblock %}

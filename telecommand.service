@@ -1,0 +1,16 @@
+[Unit]
+Description=TeleCommand Bot
+After=network.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME
+WorkingDirectory=/path/to/telecommand
+ExecStart=/path/to/telecommand/venv/bin/python /path/to/telecommand/bot.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

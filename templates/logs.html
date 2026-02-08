@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Command Logs - TeleCommand Pro{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 2rem;">📜 Command Logs</h1>
+
+<div class="card">
+    {% if logs %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Time</th>
+                <th>User</th>
+                <th>Command</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td><strong>#{{ log.id }}</strong></td>
+                <td>{{ log.executed_at }}</td>
+                <td>
+                    {% if log.username %}
+                        @{{ log.username }}
+                    {% elif log.first_name %}
+                        {{ log.first_name }}
+                    {% else %}
+                        ID: {{ log.telegram_user_id }}
+                    {% endif %}
+                </td>
+                <td>
+                    <code style="display: inline-block; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        {{ log.command }}
+                    </code>
+                </td>
+                <td>
+                    {% if log.success %}
+                        <span class="badge badge-success">✅ Success</span>
+                    {% else %}
+                        <span class="badge badge-danger">❌ Failed</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('log_detail', log_id=log.id) }}" class="btn btn-sm btn-primary">View Details</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div class="pagination">
+        {% if page > 1 %}
+            <a href="{{ url_for('logs', page=page-1) }}">« Previous</a>
+        {% endif %}
+        
+        {% for p in range(1, total_pages + 1) %}
+            {% if p == page %}
+                <a href="{{ url_for('logs', page=p) }}" class="active">{{ p }}</a>
+            {% elif p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
+                <a href="{{ url_for('logs', page=p) }}">{{ p }}</a>
+            {% elif p == page - 3 or p == page + 3 %}
+                <span>...</span>
+            {% endif %}
+        {% endfor %}
+        
+        {% if page < total_pages %}
+            <a href="{{ url_for('logs', page=page+1) }}">Next »</a>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <p style="text-align: center; color: #999; padding: 2rem;">
+        No command logs yet. Commands will appear here once users start using the bot.
+    </p>
+    {% endif %}
+</div>
+{% endblock %}
