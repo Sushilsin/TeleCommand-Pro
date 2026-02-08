@@ -1,7 +1,6 @@
 # TeleCommand Pro
 
-> 🤖 A secure, cross-platform Telegram bot for remotely managing your servers and workstations with OS-level command execution capabilities.
-
+> 🤖 Secure Telegram bot for remote server management with OS-level command execution, web-based admin portal, multi-user support, and role-based access control. Cross-platform support for Windows, Linux, and macOS.
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)]()
 [![Python](https://img.shields.io/badge/python-3.8%2B-blue)]()
 [![License](https://img.shields.io/badge/license-MIT-green)]()
